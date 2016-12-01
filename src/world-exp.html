@@ -1,0 +1,855 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/av-icons.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../bower_components/neon-animation/animations/slide-from-top-animation.html">
+<link rel="import" href="../bower_components/neon-animation/animations/fade-out-animation.html">
+
+<dom-module id="world-exp">
+  <template>
+    <style include="iron-flex iron-flex-alignment">
+
+      svg {
+
+        height: 100%;
+        width: 100%;
+        z-index: 100;
+      }
+
+      div#container {
+
+        height: 100%;
+        background: url(../img/world.png) no-repeat;
+        background-size: 100% 100%;
+        background-color: #373b50;
+        z-index: -100;
+      }
+
+      text {
+
+        fill: #edf1f4;
+        font-size: 0.75vw;
+      }
+
+      text.axisTitle {
+
+        font-size: 0.75vw;
+      }
+
+      line {
+
+        stroke: #edf1f4;
+      }
+
+      path {
+
+        stroke: #edf1f4;
+      }
+
+      paper-dropdown-menu {
+
+        position: fixed;
+        top: 2vh;
+        right: 12vw;
+        bottom: auto;
+        left: auto;
+        width: 18vw;
+        z-index: 2;
+        height: 8vh;
+
+        --paper-input-container-label: {
+
+          color: #edf1f4;
+          height: 4vh;
+          font-size: 1vw;
+        }
+
+        --paper-input-container: {
+
+          padding: 0px;
+          height: 8vh;
+        }
+
+        --paper-input-container-input: {
+
+          color: #edf1f4;
+          height: 4vh;
+          font-size: 1vw;
+        }
+
+        --paper-input-container-focus-color: #edf1f4;
+      }
+
+      paper-button {
+
+        position: fixed;
+        top: 2vh;
+        right: 2vw;
+        bottom: auto;
+        left: auto;
+        text-transform: none;
+        border-style: groove;
+        border-width: thin;
+        border-color: #bac;
+        font-size: 1.25vw;
+        width: 8vw;
+        height: 6vh;
+      }
+
+      div#title {
+
+        position: fixed;
+        top: 2vh;
+        left: 2vw;
+        bottom: auto;
+        right: auto;
+        font-size: 2vw;
+      }
+
+      div#controls {
+
+        position: fixed;
+        top: auto;
+        left: auto;
+        bottom: 1vh;
+        right: 1vw;
+        font-size: 0.75vw;
+      }
+
+      paper-icon-button {
+
+        width: 3vw;
+        padding: 0.5vmin;
+      }
+
+      div#year {
+
+        text-align: center;
+        font-size: 2vw;
+      }
+
+      div#total {
+
+        text-align: center;
+        font-size: 0.75vw;
+        margin-top: 1vh;
+      }
+
+      rect.pop {
+
+        fill: #3f51b5;
+        stroke: #edf1f4;
+        opacity: 0.8;
+      }
+
+      a {
+
+        color: #edf1f4;
+      }
+
+      rect.pop.active {
+
+        fill: #edf1f4;
+      }
+
+      div#stats {
+
+        visibility: hidden;
+        position: fixed;
+        top: 11vh;
+        left: auto;
+        bottom: auto;
+        right: auto;
+        font-size: 2vmin;
+      }
+
+      div#before {
+
+        border-right-style: groove;
+        padding-right: 1vw;
+        border-right-width: thin;
+        font-weight: lighter;
+        text-align: center;
+      }
+
+      div#current {
+
+        padding-right: 1vw;
+        padding-left: 1vw;
+        text-align: center;
+        font-weight: bolder;
+      }
+
+      div#after {
+
+        border-left-style: groove;
+        padding-left: 1vw;
+        border-left-width: thin;
+        font-weight: lighter;
+        text-align: center;
+      }
+
+      div.perc {
+
+        font-size: larger;
+        padding-bottom: 1vh;
+      }
+
+      div.event {
+
+        visibility: hidden;
+        position: fixed;
+        top: auto;
+        left: auto;
+        bottom: auto;
+        right: auto;
+        font-size: 0.75vw;
+        z-index: 1;
+      }
+
+      div.event.active {
+
+        font-weight: bold;
+      }
+
+      polyline.marker {
+
+        stroke: #bac;
+        fill: none;
+        stroke-width: 0.5;
+      }
+
+      polyline.marker.active {
+
+        stroke: #edf1f4;
+        fill: none;
+        stroke-width: 2;
+      }
+
+      paper-item {
+
+        font-size: 1vw;
+        font-weight: lighter;
+        text-align: left;
+        min-height: 1vh;
+      }
+
+      paper-listbox {
+
+        --paper-listbox-background-color: #373b50;
+        --paper-listbox-color: #edf1f4;
+      }
+
+      paper-dialog {
+
+        background-color: #373b50;
+        color: #edf1f4;
+        border-color: #bac;
+        border-style: groove;
+        position: fixed;
+        top: 5vh;
+        left: auto;
+        bottom: auto;
+        right: -0.5vw;
+        width: 60vw;
+        font-size: 2vmin;
+      }
+
+      paper-dialog div {
+
+        margin: 0px;
+        text-align: justify;
+        padding: 1vmin;
+      }
+    </style>
+    <div id="title">What has {{country}} experienced?</div>
+    <div id="container">
+      <div id="stats" class="layout horizontal">
+        <div id="before" class="layout vertical">
+          <div class="perc">{{beforePerc}}%</div>
+          <div>born</div>
+          <div>before</div>
+        </div>
+        <div id="current" class="layout vertical">
+          <div class="perc">{{currentPerc}}%</div>
+          <div>born in</div>
+          <div>{{selectedYear}}</div>
+        </div>
+        <div id="after" class="layout vertical">
+          <div class="perc">{{afterPerc}}%</div>
+          <div>born</div>
+          <div>after</div>
+        </div>
+      </div>
+      <div id="controls" class="layout vertical">
+        <div id="year" class="flex">{{currentYear}}</div>
+        <div id="total">Total population: {{currentTotalPop}}</div>
+        <div id="buttons" class="layout horizontal">
+          <paper-icon-button id="prev" icon="av:skip-previous" on-tap="prevYear"></paper-icon-button>
+          <paper-icon-button id="play" icon="{{currentState}}" on-tap="toggleState"></paper-icon-button>
+          <paper-icon-button id="next" icon="av:skip-next" on-tap="nextYear"></paper-icon-button>
+        </div>
+      </div>
+      <template is="dom-repeat" items="{{events}}">
+        <div id="event{{item.id}}" class="event">
+          <a on-mouseover="eventHovered" on-mouseout="mouseout" href="{{item.link}}" target="_blank">{{item.description}}</a>
+        </div>
+      </template>
+      <paper-dropdown-menu label="Select country/region:">
+        <paper-listbox id="countryList" class="dropdown-content" on-iron-items-changed="loadQuery" on-iron-select="countrySelected">
+          <template is="dom-repeat" items="{{countries}}">
+            <paper-item>{{item}}</paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dropdown-menu>
+      <paper-button on-tap="openDialog" title="About" raised>
+        About
+        <iron-icon icon="arrow-drop-down"></iron-icon>
+      </paper-button>
+      <paper-dialog id="aboutDialog" entry-animation="slide-from-top-animation" exit-animation="fade-out-animation" with-backdrop>
+        <h2>About this Visualization</h2>
+        <div class="layout vertical">
+          <p>
+            This visualization explores the major events that people currently living in the world have experienced in their lifetime. 
+            It combines 
+            <a href="https://esa.un.org/unpd/wpp/Download/Standard/ASCII/" target="_blank">Age Distribution data from United Nations</a> 
+            with <a href="https://en.wikipedia.org/wiki/Timeline_of_modern_history" target="_blank">Major World Events from Wikipedia</a> 
+            to visualize percentage of population that were born before or after a major world event.
+          </p>
+          <p>Arun Kishore<br>
+             Data ❤er<br>
+             arun[at]arunkishore[dot]com<br>
+             <a href="http://www.linkedin.com/in/arunkishore" target="_blank">LinkedIn</a> | 
+             <a href="http://www.facebook.com/arun.kishore" target="_blank">Facebook</a> | 
+             <a href="http://www.youtube.com/arunkishore" target="_blank">YouTube</a> |
+             <a href="http://www.twitter.com/arun_kishore" target="_blank">Twitter</a>
+             </p>
+        </div>
+      </paper-dialog>
+      <svg id="svg" class="flex">
+      </svg>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'world-exp',
+
+      ready: function() {
+
+        this.svg = d3.select(this.$.svg);
+        this.countries = [];
+        this.country = "The World";
+        this.events = [];
+        this.years = {};
+        this.totalPop = {};
+        this.currentTotalPop = "";
+        this.yearsBefore = 100;
+        this.yearsAfter = 14;
+        this.selectedYear = -1;
+        this.numEventsPerColumn = 12;
+        this.yAxis = undefined;
+        this.setSize();
+        this.scopeSubtree(this.$.svg, true);
+        this.loadEvents();
+        this.loadIndex();
+        this.init();
+
+        // pause icon when playing, and vice versa
+        this.playState = "av:pause-circle-outline";
+        this.pauseState = "av:play-circle-outline";
+        this.currentState = this.pauseState;
+        this.firstYear = 1990;
+        this.lastYear = 2016;
+        this.dataReady = false;
+
+        var that = this;
+        window.addEventListener("resize", function() {
+
+          if(that.dataReady) {
+
+            that.setSize();
+            that.draw();
+          }
+        });
+      },
+
+      openDialog: function(e) {
+
+        this.$.aboutDialog.positionTarget = e;
+        this.$.aboutDialog.open();
+      },
+
+      loadQuery: function() {
+
+        if(this.$.countryList.items.length == 0) {
+
+          return;
+        }
+
+        // Read query string for initial params
+        var match, pl = /\+/g,  // Regex for replacing addition symbol with a space
+          search = /([^&=]+)=?([^&]*)/g,
+          decode = function (s) { return unescape(decodeURIComponent(s.replace(pl, " "))); },
+          query  = window.location.search.substring(1);
+        var urlParams = {};
+        while(match = search.exec(query)) {
+
+          urlParams[decode(match[1]).toUpperCase()] = decode(match[2]).toUpperCase();
+        }
+
+        var selectedCountry = (urlParams["COUNTRY"] == undefined) ? "The World" : urlParams["COUNTRY"];
+        var listedCountry = this.countries.find(function(country) { return country.toUpperCase() === selectedCountry; });
+        if(listedCountry == undefined) {
+
+          listedCountry = "The World";
+        }
+
+        this.$.countryList.selectIndex(this.countries.indexOf(listedCountry));
+      },
+
+      setSize: function() {
+
+        this.width = parseInt(this.svg.style("width"));
+        this.height = parseInt(this.svg.style("height"));
+        var controlsWidth = parseInt(d3.select(this.$.controls).style("width"));
+        var statsHeight = parseInt(d3.select(this.$.stats).style("height"));
+        this.marginWidth = this.width / 75;
+        this.marginHeight = this.height / 30;
+        this.axisHeight = this.height / 2.5;
+        this.topHeight = this.height * 0.12 + statsHeight;
+        this.eventHeight = (this.axisHeight - 2 * this.marginHeight) / this.numEventsPerColumn;
+        this.rectWidth = (this.width * 0.96 - this.marginWidth - controlsWidth) / this.yearsBefore;
+        this.yearsAfter = Math.floor((controlsWidth + 0.04 * this.width - this.marginWidth) / this.rectWidth);
+        this.$.controls.style.bottom = (this.axisHeight + this.marginHeight).toString() + "px";
+        this.yAxis = undefined;
+        this.createPopScale();
+      },
+
+      loadEvents: function() {
+
+        var that = this;
+        d3.csv("./data/EVENTS.csv", function(data) {
+
+          for(var i = 0; i < data.length; i++) {
+            
+            that.push('events', {id: i.toString(),
+              year: +data[i].year,
+              description: data[i].description,
+              link: data[i].link});
+          }
+        });
+      },
+
+      loadIndex: function() {
+
+        var that = this;
+        d3.csv("./data/INDEX.csv", function(data) {
+
+          for(var i = 0; i < data.length; i++) {
+            
+            that.push('countries', data[i].country);
+          }
+        });
+      },
+
+      countrySelected: function(e) {
+
+        this.country = e.detail.item.textContent.trim();
+        this.years = {};
+        this.maxPop = 0;
+        if(this.currentState === this.playState) {
+
+          this.toggleState();
+        }
+        var that = this;
+        d3.csv("./data/" + this.country + ".csv", function(data) {
+
+          for(var i = 0; i < data.length; i++) {
+
+            if(+data[i].year < that.firstYear ||
+               +data[i].year > that.lastYear) {
+
+              continue;
+            }
+
+            if(that.years[+data[i].year] == undefined) {
+
+              that.years[+data[i].year] = [{age: +data[i].age, population: +data[i].population * 1000}];
+            }
+            else {
+
+              that.years[+data[i].year].push({age: +data[i].age, population: +data[i].population * 1000});
+            }
+
+            if(+data[i].population * 1000 > that.maxPop) {
+
+              that.maxPop = +data[i].population * 1000;
+            }
+          }
+
+          that.dataLoaded();
+        });
+      },
+
+      rectMouseover: function(d, e) {
+
+        d3.select(e).classed("active", true);
+
+        var markers = Polymer.dom(this.root).querySelectorAll('polyline.marker');
+        for(var i = 0; i < markers.length; i++) {
+
+          var ei = Number(markers[i].id.substring(6));
+          if(this.events[ei].year === d.selectedYear) {
+
+            d3.select(markers[i]).classed("active", true);
+          }
+        }
+
+        var events = Polymer.dom(this.root).querySelectorAll('div.event');
+        for(var i = 0; i < events.length; i++) {
+
+          var ei = Number(events[i].id.substring(5));
+          if(this.events[ei].year === d.selectedYear) {
+
+            d3.select(events[i]).classed("active", true);
+          }
+        }
+
+        this.selectedYear = d.selectedYear;
+        this.selectedRect = d;
+        this.drawStats();
+        this.$.stats.style.visibility = "visible";
+      },
+
+      eventHovered: function(e) {
+
+        var ei = Number(e.target.parentNode.id.substring(5));
+        if(ei == undefined) {
+
+          return;
+        }
+
+        var rects = Polymer.dom(this.root).querySelectorAll('rect#rect' + this.events[ei].year.toString());
+
+        if(rects.length < 1) {
+
+          return;
+        }
+
+        for(var i = 0; i < this.years[this.currentYear].length; i++) {
+
+          if((this.currentYear - this.years[this.currentYear][i].age) === this.events[ei].year) {
+
+            this.rectMouseover(this.years[this.currentYear][i], rects[0]);
+            break;
+          }
+        }
+      },
+
+      mouseout: function() {
+
+        this.svg.selectAll(".active").classed("active", false);
+        
+        var markers = Polymer.dom(this.root).querySelectorAll('polyline.marker');
+        for(var i = 0; i < markers.length; i++) {
+
+          d3.select(markers[i]).classed("active", false);
+        }
+        
+        var events = Polymer.dom(this.root).querySelectorAll('div.event');
+        for(var i = 0; i < events.length; i++) {
+
+          d3.select(events[i]).classed("active", false);
+        }
+
+        this.selectedYear = -1;
+        this.drawStats();
+        this.$.stats.style.visibility = "hidden";
+      },
+
+      calcPercs: function() {
+
+        this.totalPop = {};
+        for(var y = this.firstYear; y <= this.lastYear; y++) {
+
+          this.totalPop[y] = 0;
+          for(var i = 0; i < this.years[y].length; i++) {
+
+            this.totalPop[y] += this.years[y][i].population;
+          }
+
+          var beforePerc = 100.0, afterPerc = 0.0;
+          for(var i = 0; i < this.years[y].length; i++) {
+
+            this.years[y][i].currentPerc = this.years[y][i].population * 100 / this.totalPop[y];
+            this.years[y][i].beforePerc = beforePerc - this.years[y][i].currentPerc;
+            this.years[y][i].afterPerc = afterPerc;
+            this.years[y][i].selectedYear = y - i;
+
+            beforePerc -= this.years[y][i].currentPerc;
+            afterPerc += this.years[y][i].currentPerc;
+          }
+        }
+      },
+
+      init: function() {
+
+        this.currentYear = this.firstYear - 1;
+        this.populationG = this.svg.append("g");
+        this.markersG = this.svg.append("g");
+        this.yAxis = undefined;
+        this.createPopScale();
+        this.calcPercs();
+      },
+
+      createPopScale: function() {
+        
+        this.popScale = d3.scaleLinear()
+          .domain([0, this.maxPop])
+          .range([this.height - this.axisHeight - this.topHeight, 0]);
+      },
+
+      updateTimeScale: function() {
+
+        var startDate = new Date(this.currentYear - this.yearsBefore, 1, 1);
+        var endDate = new Date(this.currentYear + this.yearsAfter + 1 , 1, 1);
+
+        if(this.timeScale == undefined) {
+
+          this.timeScale = d3.scaleTime()
+            .domain([startDate, endDate])
+            .range([0, this.width - 2 * this.marginWidth]);
+        }
+        else {
+
+          this.timeScale
+            .domain([startDate, endDate])
+            .range([0, this.width - 2 * this.marginWidth]); 
+        }
+      },
+
+      drawAxis: function() {
+
+        this.svg
+            .selectAll("g.xAxis")
+            .remove();
+
+        var xAxis = d3.axisBottom(this.timeScale)
+                        .ticks(25);
+        this.svg
+          .append("g")
+            .attr("class", "xAxis")
+            .attr("transform", "translate(" + this.marginWidth.toString() + "," + (this.height - this.axisHeight).toString() + ")")
+            .call(xAxis);
+
+        if(this.yAxis != undefined) {
+
+          return;
+        }
+
+        this.svg
+            .selectAll("g.yAxis")
+            .remove();
+
+        this.svg
+            .selectAll("text.axisTitle")
+            .remove();
+
+        this.yAxis = d3.axisRight(this.popScale)
+                        .ticks(10, "s");
+
+        var yAxisXPos = this.timeScale(new Date(this.currentYear, 1, 1)) + 2 * this.rectWidth;
+        this.svg
+          .append("g")
+            .attr("class", "yAxis")
+            .attr("transform", "translate(" + yAxisXPos.toString() + "," + (this.height - this.axisHeight - this.popScale(0)).toString() + ")")
+            .call(this.yAxis)
+          .selectAll("text")
+            .attr("transform", "translate(0, -4)");
+
+        this.svg
+          .append("text")
+            .attr("class", "axisTitle")
+            .attr("transform", "translate(" + (yAxisXPos + 2.75 * this.marginWidth).toString() + "," + 
+                                              (this.height - this.axisHeight - this.popScale(this.maxPop * 0.02)).toString() + 
+                                              ")rotate(90)")
+            .text("Population by birth year");
+      },
+
+      drawPopulation: function() {
+
+        var that = this;
+        var popRects = this.populationG
+          .selectAll("rect.pop")
+          .data(this.years[this.currentYear]);
+
+        popRects
+          .enter()
+          .append("rect")
+            .attr("class", "pop")
+            .attr("id", function(d) { return "rect" + (that.currentYear - d.age).toString(); } )
+            .attr("y", function(d) { return that.height - that.axisHeight - that.popScale(that.maxPop - d.population); })
+            .attr("x", function(d) { return that.timeScale(new Date(that.currentYear - d.age, 1, 1)) + that.rectWidth; })
+            .attr("height", function(d) { return that.popScale(that.maxPop - d.population); })
+            .attr("width", that.rectWidth)
+            .on("mouseover", function(d) { return that.rectMouseover(d, this); })
+            .on("mouseout", function(d) { return that.mouseout(); });
+
+        popRects
+          .transition()
+          .attr("id", function(d) { return "rect" + (that.currentYear - d.age).toString(); } )
+          .attr("y", function(d) { return that.height - that.axisHeight - that.popScale(that.maxPop - d.population); })
+          .attr("x", function(d) { return that.timeScale(new Date(that.currentYear - d.age, 1, 1)) + that.rectWidth; })
+          .attr("height", function(d) { return that.popScale(that.maxPop - d.population); })
+          .attr("width", that.rectWidth);
+
+        popRects
+          .exit()
+          .transition()
+          .remove();
+      },
+
+      drawStats: function() {
+
+        if(this.selectedYear != -1) {
+
+          this.beforePerc = this.selectedRect.beforePerc.toFixed(1).toString();
+          this.currentPerc = this.selectedRect.currentPerc.toFixed(1).toString();
+          this.afterPerc = this.selectedRect.afterPerc.toFixed(1).toString();
+          var drawnYear = Math.max(this.selectedYear, this.currentYear - this.yearsBefore + 7);
+          this.$.stats.style.left = (this.timeScale(new Date(drawnYear, 1, 1)) - 6.5 * this.rectWidth).toString() + "px";
+        }
+      },
+
+      getVisibility: function(i) {
+
+        return (this.events[i].year >= this.currentYear - this.yearsBefore)  && 
+               (this.events[i].year <= this.currentYear) ? "visible" : "hidden";
+      },
+
+      drawEvents: function() {
+
+        for(var i = 0; i < this.events.length; i++) {
+
+          var events = Polymer.dom(this.root).querySelectorAll('div#event' + i.toString());
+          if(events.length < 1) {
+
+            continue;
+          }
+          events[0].style.left = (this.timeScale(new Date(this.events[i].year, 1, 1)) + 2 * this.rectWidth).toString() + "px";
+          events[0].style.bottom = (((i + 1) % this.numEventsPerColumn) * this.eventHeight + this.marginHeight).toString() + "px";
+          events[0].style.height = this.eventHeight.toString() + "px";
+          events[0].style.visibility = this.getVisibility(i);
+        }
+
+        var that = this;
+        var markers = this.markersG
+          .selectAll("polyline.marker")
+          .data(this.events);
+
+        markers
+          .enter()
+          .append("polyline")
+            .attr("class", "marker")
+            .attr("id", function(d, i) { return "marker" + i.toString(); } )
+            .attr("visibility", function(d, i) { return that.getVisibility(i); })
+            .attr("points", function(d, i) { return (that.timeScale(new Date(d.year, 1, 1)) + 1.5 * that.rectWidth).toString() + "," +
+              (that.height - that.axisHeight).toString() + " " +
+              (that.timeScale(new Date(d.year, 1, 1)) + 1.5 * that.rectWidth).toString() + "," +
+              (that.height - ((i + 1) % that.numEventsPerColumn + 0.5) * that.eventHeight - 1.15 * that.marginHeight).toString() + " " +
+              (that.timeScale(new Date(d.year, 1, 1)) + 1.8 * that.rectWidth).toString() + "," +
+              (that.height - ((i + 1) % that.numEventsPerColumn + 0.5) * that.eventHeight - 1.15 * that.marginHeight).toString(); });
+
+        markers
+          .attr("visibility", function(d, i) { return that.getVisibility(i); })
+          .attr("points", function(d, i) { return (that.timeScale(new Date(d.year, 1, 1)) + 1.5 * that.rectWidth).toString() + "," +
+            (that.height - that.axisHeight).toString() + " " +
+            (that.timeScale(new Date(d.year, 1, 1)) + 1.5 * that.rectWidth).toString() + "," +
+            (that.height - ((i + 1) % that.numEventsPerColumn + 0.5) * that.eventHeight - 1.15 * that.marginHeight).toString() + " " +
+            (that.timeScale(new Date(d.year, 1, 1)) + 1.8 * that.rectWidth).toString() + "," +
+            (that.height - ((i + 1) % that.numEventsPerColumn + 0.5) * that.eventHeight - 1.15 * that.marginHeight).toString(); });
+
+        markers
+          .exit()
+          .transition()
+          .remove();
+      },
+
+      customFormat: function(x) {
+
+        var s = d3.format(".3s")(x);
+
+        switch(s[s.length - 1]) {
+
+          case "G": return s.slice(0, -1) + "B";
+        }
+
+        return s;
+      },
+
+      draw: function() {
+
+        this.updateTimeScale();
+        this.drawEvents();
+        this.drawAxis();
+        this.drawPopulation();
+        this.drawStats();
+        this.currentTotalPop = this.customFormat(this.totalPop[this.currentYear]);
+      },
+
+      toggleState: function() {
+
+        if(this.currentState === this.playState) {
+
+          this.currentState = this.pauseState;
+          if(this.interval != undefined) {
+
+          this.interval.stop();
+          }
+        }
+        else {
+
+          var that = this;
+          this.currentState = this.playState;
+          this.interval = d3.interval(function() { that.nextYear(); }, 250);
+        }
+      },
+
+      prevYear: function() {
+
+        this.currentYear = (this.currentYear - this.firstYear + this.lastYear - this.firstYear) % (this.lastYear - this.firstYear + 1) + this.firstYear;
+        this.draw();
+      },
+
+      nextYear: function() {
+
+        this.currentYear = (this.currentYear - this.firstYear + 1) % (this.lastYear - this.firstYear + 1) + this.firstYear;
+        this.draw();
+
+        if(this.currentYear == this.lastYear &&
+           this.currentState === this.playState) {
+
+          this.toggleState();
+        }
+      },
+
+      dataLoaded: function() {
+
+        this.dataReady = true;
+        this.svg.selectAll("*").remove();
+        this.init();
+        if(this.currentState === this.pauseState) {
+
+          this.toggleState();
+        }
+      },
+    });
+  </script>
+</dom-module>
+
