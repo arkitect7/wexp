@@ -472,12 +472,6 @@
 
           for(var i = 0; i < data.length; i++) {
 
-            if(+data[i].year < that.firstYear ||
-               +data[i].year > that.lastYear) {
-
-              continue;
-            }
-
             if(that.years[+data[i].year] == undefined) {
 
               that.years[+data[i].year] = [{age: +data[i].age, population: +data[i].population * 1000}];
